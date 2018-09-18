@@ -171,20 +171,20 @@
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
     var result;
+    var iteration = 0;
     
-    for (let i = 0; i < collection.length; i++) {
-      var item = collection[i];
-      
-      if (accumulator !== undefined && i === 0) {
+    _.each(collection, function(val, key) {
+      if (accumulator !== undefined && iteration === 0) {
         result = accumulator;
-        result = iterator(result, item, collection);
-      } else if (i === 0) {
-        result = item;
+        result = iterator(result, val, key);
+      } else if (iteration === 0) {
+        result = val;
       } else {
-        result = iterator(result, item, collection);
+        result = iterator(result, val, collection);
       }
       
-    }
+      iteration++;
+    });
     
     return result;
   };
@@ -204,12 +204,28 @@
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
+    if (Object.keys(collection).length === 0) { return true; }
+    
+    iterator = iterator || _.identity;
+    
+    return _.reduce(collection, function(allPassSoFar, val) {
+      if (!allPassSoFar) {
+        return false;
+      }
+      return !!iterator(val);
+    }, true);
     // TIP: Try re-using reduce() here.
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
+    iterator = iterator || _.identity;
+    
+    return !_.every(collection, function(val) {
+      return !iterator(val);
+    });
+    
     // TIP: There's a very clever way to re-use every() here.
   };
 
@@ -232,7 +248,12 @@
   //   }, {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
-  _.extend = function(obj) {
+  _.extend = function(obj, ...sources) {
+    return _.reduce(sources, function(acc, source) {
+      _.each(source, function(val, key) {
+        acc[key] = val;
+      });
+    }, obj);
   };
 
   // Like extend, but doesn't ever overwrite a key that already
