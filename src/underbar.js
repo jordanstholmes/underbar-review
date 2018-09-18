@@ -253,12 +253,27 @@
       _.each(source, function(val, key) {
         acc[key] = val;
       });
+      return obj;
     }, obj);
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
-  _.defaults = function(obj) {
+  _.defaults = function(obj, ...sources) {
+    var originalKeys = Object.keys(obj);
+    
+    return _.reduce(sources, function(acc, source) {
+      
+      _.each(source, function(val, key) {
+        if (!originalKeys.includes(key)) {
+          acc[key] = val;
+          originalKeys.push(key); 
+        }
+      });
+      
+      return obj;
+      
+    }, obj);
   };
 
 
