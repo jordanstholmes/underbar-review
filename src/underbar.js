@@ -386,14 +386,72 @@
 
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
-  _.invoke = function(collection, functionOrKey, args) {
+  _.invoke = function(collection, functionOrKey, ...args) {
+    var result = [];
+  
+    _.each(collection, function(val) {
+      functionOrKey = typeof functionOrKey === 'function' ? functionOrKey : val[functionOrKey];
+      
+      result.push(functionOrKey.apply(val, [...args]));
+    });
+    
+    return result;
   };
 
   // Sort the object's values by a criterion produced by an iterator.
   // If iterator is a string, sort objects by that property with the name
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
+  
+  // [1, 2, 3, 5, 4]
+  //           ^  ^
+  
+  var sort = function(arr) {
+    var arr = arr.slice();
+    
+    for (var i = 0; i < arr.length - 1; i++) {
+      
+      for (var j = i + 1; j < arr.length; j++) {
+
+        if (arr[i] > arr[j]) {
+          let jVal = arr[j];
+          arr[j] = arr[i];
+          arr[i] = jVal;
+        }
+      }
+    }
+    
+    return arr;
+  };
+  
   _.sortBy = function(collection, iterator) {
+    var changedCollection = [];
+    var sorted = _.map(collection, x => x);
+    
+    if (typeof iterator === 'string') {
+      changedCollection = _.pluck(collection, iterator);
+    } else if (iterator === undefined) {
+      changedCollection = _.map(collection, x => x);
+    } else {
+      changedCollection = _.map(collection, iterator);
+    }
+    
+    for (var i = 0; i < changedCollection.length - 1; i++) {
+      
+      for (var j = i + 1; j < changedCollection.length; j++) {
+        
+        if (changedCollection[i] > changedCollection[j]) {
+          let jVal = changedCollection[j];
+          let jsorted = sorted[j]; 
+          changedCollection[j] = changedCollection[i];
+          sorted[j] = sorted[i];
+          changedCollection[i] = jVal;
+          sorted[i] = jsorted;
+        }
+      }
+    }
+    
+    return sorted;
   };
 
   // Zip together two or more arrays with elements of the same index
